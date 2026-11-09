@@ -394,7 +394,7 @@ public class Main {
             setFocusable(true);
             backlog.add(characterName + "\u3000" + message);
             items.add("\u53e4\u3044\u9375");
-            items.add("\u6708\u306e\6b20\u7247");
+            items.add("\u6708\u306e\u6b20\u7247");
             addMouseListener(new MouseAdapter() {
                 @Override public void mouseClicked(MouseEvent e) {
                     if (!handleDialogueMenuClick(e.getX(), e.getY())) {
@@ -600,7 +600,7 @@ public class Main {
             if ("\u53e4\u3044\u9375".equals(item)) {
                 return "\u9306\u3073\u3066\u3044\u308b\u304c\u3001\u307e\u3060\u4f55\u304b\u3092\u958b\u3051\u3089\u308c\u305d\u3046\u3060\u3002";
             }
-            if ("\u6708\u306e\6b20\u7247".equals(item)) {
+            if ("\u6708\u306e\u6b20\u7247".equals(item)) {
                 return "\u6de1\u3044\u5149\u3092\u653e\u3064\u3001\u534a\u900f\u660e\u306a\u6b20\u7247\u3002";
             }
             return "\u8a73\u7d30\u306f\u307e\u3060\u5206\u304b\u3089\u306a\u3044\u3002";
