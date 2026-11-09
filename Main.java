@@ -237,11 +237,17 @@ public class Main {
         InputMap input = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actions = root.getActionMap();
         input.put(KeyStroke.getKeyStroke("H"), "toggleDialogue");
+        input.put(KeyStroke.getKeyStroke("I"), "toggleInventory");
         input.put(KeyStroke.getKeyStroke("F5"), "saveGame");
         input.put(KeyStroke.getKeyStroke("F9"), "loadGame");
         actions.put("toggleDialogue", new AbstractAction() {
             @Override public void actionPerformed(ActionEvent e) {
                 if (gamePanel.isShowing()) gamePanel.toggleDialogue();
+            }
+        });
+        actions.put("toggleInventory", new AbstractAction() {
+            @Override public void actionPerformed(ActionEvent e) {
+                if (gamePanel.isShowing()) gamePanel.toggleInventory();
             }
         });
         actions.put("saveGame", new AbstractAction() {
@@ -371,12 +377,15 @@ public class Main {
 
     static class GamePanel extends JPanel {
         boolean dialogueVisible = true;
+        boolean inventoryVisible = false;
         BufferedImage backgroundImage;
         BufferedImage characterImage;
         BufferedImage eventImage;
         String characterName = "\u30ad\u30e3\u30e9\u30af\u30bf\u30fc";
         String message = "\u3053\u3053\u306b\u30bb\u30ea\u30d5\u3092\u8868\u793a\u3057\u307e\u3059\u3002";
         List<String> backlog = new ArrayList<>();
+        List<String> items = new ArrayList<>();
+        String selectedItem;
         int visibleCharacters = 0;
         Timer textTimer;
 
@@ -384,6 +393,8 @@ public class Main {
             setBackground(Color.BLACK);
             setFocusable(true);
             backlog.add(characterName + "\u3000" + message);
+            items.add("\u53e4\u3044\u9375");
+            items.add("\u6708\u306e\6b20\u7247");
             addMouseListener(new MouseAdapter() {
                 @Override public void mouseClicked(MouseEvent e) {
                     if (!handleDialogueMenuClick(e.getX(), e.getY())) {
@@ -400,13 +411,28 @@ public class Main {
             repaint();
         }
 
+        void toggleInventory() {
+            inventoryVisible = !inventoryVisible;
+            repaint();
+        }
+
         boolean handleDialogueMenuClick(int mouseX, int mouseY) {
-            if (!dialogueVisible) return false;
             double scale = Math.min(getWidth() / (double) GAME_WIDTH,
                 getHeight() / (double) GAME_HEIGHT);
             int x = (int) ((mouseX - (getWidth() - GAME_WIDTH * scale) / 2) / scale);
             int y = (int) ((mouseY - (getHeight() - GAME_HEIGHT * scale) / 2) / scale);
-            if (y < 620 || y > 670) return false;
+            if (inventoryVisible) {
+                int itemIndex = (y - 230) / 42;
+                if (x >= 300 && x <= 700 && y >= 230 && itemIndex >= 0 && itemIndex < items.size()) {
+                    selectedItem = items.get(itemIndex);
+                    repaint();
+                } else {
+                    toggleInventory();
+                }
+                return true;
+            }
+            if (!dialogueVisible) return false;
+            if (y < 640 || y > 680) return false;
 
             if (x >= 850 && x < 905) {
                 saveGame();
@@ -419,6 +445,9 @@ public class Main {
                 return true;
             } else if (x >= 1050 && x < 1110) {
                 confirmReturnToTitle();
+                return true;
+            } else if (x >= 1120 && x < 1185) {
+                toggleInventory();
                 return true;
             }
             return false;
@@ -467,6 +496,7 @@ public class Main {
             drawCharacter(g2);
             drawEventImage(g2);
             if (dialogueVisible) drawDialogue(g2);
+            if (inventoryVisible) drawInventory(g2);
             g2.dispose();
         }
 
@@ -521,12 +551,59 @@ public class Main {
 
             g2.setFont(new Font("SansSerif", Font.BOLD, 13));
             g2.setColor(MUTED);
-            g2.drawString("\u30bb\u30fc\u30d6", 850, 650);
-            g2.drawString("\u30ed\u30fc\u30c9", 910, 650);
-            g2.drawString("\u30d0\u30c3\u30af\u30ed\u30b0", 970, 650);
-            g2.drawString("\u30bf\u30a4\u30c8\u30eb", 1050, 650);
+            g2.drawString("\u30bb\u30fc\u30d6", 850, 665);
+            g2.drawString("\u30ed\u30fc\u30c9", 910, 665);
+            g2.drawString("\u30d0\u30c3\u30af\u30ed\u30b0", 970, 665);
+            g2.drawString("\u30bf\u30a4\u30c8\u30eb", 1050, 665);
+            g2.drawString("\u30a2\u30a4\u30c6\u30e0", 1120, 665);
             g2.setColor(ACCENT);
-            g2.drawString("\u25b6", 1160, 650);
+            g2.drawString("\u25bc", 1190, 630);
+        }
+
+        void drawInventory(Graphics2D g2) {
+            g2.setColor(new Color(0, 0, 0, 150));
+            g2.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            g2.setColor(new Color(12, 18, 40, 242));
+            g2.fillRoundRect(260, 145, 760, 365, 24, 24);
+            g2.setColor(new Color(255, 255, 255, 75));
+            g2.drawRoundRect(260, 145, 759, 364, 24, 24);
+            g2.setColor(ACCENT);
+            g2.setFont(new Font("Serif", Font.BOLD, 30));
+            g2.drawString("ITEMS", 305, 205);
+            g2.setColor(MUTED);
+            g2.setFont(new Font("SansSerif", Font.PLAIN, 18));
+            if (items.isEmpty()) {
+                g2.drawString("\u30a2\u30a4\u30c6\u30e0\u306f\u3042\u308a\u307e\u305b\u3093\u3002", 305, 265);
+            } else {
+                for (int i = 0; i < items.size(); i++) {
+                    boolean selected = items.get(i).equals(selectedItem);
+                    g2.setColor(selected ? ACCENT : MUTED);
+                    g2.fillOval(310, 244 + i * 42, 9, 9);
+                    g2.setColor(selected ? ACCENT : Color.WHITE);
+                    g2.drawString(items.get(i), 334, 255 + i * 42);
+                }
+            }
+            g2.setColor(new Color(255, 255, 255, 45));
+            g2.drawLine(305, 330, 975, 330);
+            g2.setColor(ACCENT);
+            g2.setFont(new Font("SansSerif", Font.BOLD, 16));
+            g2.drawString("\u8a73\u7d30", 305, 365);
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("SansSerif", Font.PLAIN, 17));
+            g2.drawString(selectedItem == null ? "\u30a2\u30a4\u30c6\u30e0\u3092\u30af\u30ea\u30c3\u30af\u3057\u3066\u8a73\u7d30\u3092\u8868\u793a\u3057\u307e\u3059\u3002" : itemDescription(selectedItem), 305, 400);
+            g2.setColor(MUTED);
+            g2.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            g2.drawString("\u30af\u30ea\u30c3\u30af\u307e\u305f\u306f I \u30ad\u30fc\u3067\u9589\u3058\u308b", 305, 470);
+        }
+
+        String itemDescription(String item) {
+            if ("\u53e4\u3044\u9375".equals(item)) {
+                return "\u9306\u3073\u3066\u3044\u308b\u304c\u3001\u307e\u3060\u4f55\u304b\u3092\u958b\u3051\u3089\u308c\u305d\u3046\u3060\u3002";
+            }
+            if ("\u6708\u306e\6b20\u7247".equals(item)) {
+                return "\u6de1\u3044\u5149\u3092\u653e\u3064\u3001\u534a\u900f\u660e\u306a\u6b20\u7247\u3002";
+            }
+            return "\u8a73\u7d30\u306f\u307e\u3060\u5206\u304b\u3089\u306a\u3044\u3002";
         }
     }
 }
