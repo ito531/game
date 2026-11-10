@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicSliderUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -114,17 +115,12 @@ public class Main {
         JLabel fontSizeLabel = new JLabel("\u4f1a\u8a71\u30c6\u30ad\u30b9\u30c8\u306e\u5927\u304d\u3055");
         fontSizeLabel.setForeground(MUTED);
         fontSizeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JSlider fontSizeSlider = new JSlider(18, 32, dialogueFontSize);
-        fontSizeSlider.setMaximumSize(new Dimension(260, 50));
-        fontSizeSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JSlider fontSizeSlider = createSettingsSlider(18, 32, dialogueFontSize, false);
 
         JLabel textSpeedLabel = new JLabel("\u6587\u5b57\u9001\u308a\u306e\u901f\u5ea6\uff08\u9045\u3044 \u2190 \u2192 \u901f\u3044\uff09");
         textSpeedLabel.setForeground(MUTED);
         textSpeedLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JSlider textSpeedSlider = new JSlider(INSTANT_TEXT_DELAY, 150, textDelayMs);
-        textSpeedSlider.setInverted(true);
-        textSpeedSlider.setMaximumSize(new Dimension(260, 50));
-        textSpeedSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JSlider textSpeedSlider = createSettingsSlider(INSTANT_TEXT_DELAY, 150, textDelayMs, true);
         String speedPreviewText = "\u3053\u306e\u6587\u7ae0\u3067\u6587\u5b57\u30b5\u30a4\u30ba\u3068\u6587\u5b57\u9001\u308a\u901f\u5ea6\u3092\u78ba\u8a8d\u3067\u304d\u307e\u3059\u3002";
         JLabel speedPreview = new JLabel("");
         speedPreview.setForeground(new Color(255, 220, 150));
@@ -169,9 +165,7 @@ public class Main {
         JLabel volumeLabel = new JLabel("\u97f3\u91cf: " + masterVolume + "%");
         volumeLabel.setForeground(MUTED);
         volumeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JSlider volumeSlider = new JSlider(0, 100, masterVolume);
-        volumeSlider.setMaximumSize(new Dimension(260, 50));
-        volumeSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JSlider volumeSlider = createSettingsSlider(0, 100, masterVolume, false);
         volumeSlider.addChangeListener(e -> {
             masterVolume = volumeSlider.getValue();
             volumeLabel.setText("\u97f3\u91cf: " + masterVolume + "%");
@@ -208,15 +202,15 @@ public class Main {
         menu.add(Box.createVerticalStrut(18));
         menu.add(fontSizeLabel);
         menu.add(Box.createVerticalStrut(10));
-        menu.add(fontSizeSlider);
+        menu.add(createSliderAdjustment(fontSizeSlider, -1, 1));
         menu.add(Box.createVerticalStrut(25));
         menu.add(textSpeedLabel);
         menu.add(Box.createVerticalStrut(10));
-        menu.add(textSpeedSlider);
+        menu.add(createSliderAdjustment(textSpeedSlider, 5, -5));
         menu.add(Box.createVerticalStrut(25));
         menu.add(volumeLabel);
         menu.add(Box.createVerticalStrut(10));
-        menu.add(volumeSlider);
+        menu.add(createSliderAdjustment(volumeSlider, -5, 5));
         menu.add(Box.createVerticalStrut(25));
         menu.add(backButton);
         panel.add(menu);
@@ -355,6 +349,74 @@ public class Main {
             }
         });
         return button;
+    }
+
+    static JSlider createSettingsSlider(int minimum, int maximum, int value, boolean inverted) {
+        JSlider slider = new JSlider(minimum, maximum, value);
+        slider.setInverted(inverted);
+        slider.setOpaque(false);
+        slider.setUI(new SettingsSliderUI(slider));
+        slider.setMaximumSize(new Dimension(210, 44));
+        slider.setPreferredSize(new Dimension(210, 44));
+        return slider;
+    }
+
+    static JPanel createSliderAdjustment(JSlider slider, int minusAmount, int plusAmount) {
+        JPanel control = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        control.setOpaque(false);
+        control.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JButton minusButton = createAdjustmentButton("−");
+        JButton plusButton = createAdjustmentButton("＋");
+        minusButton.addActionListener(e -> adjustSlider(slider, minusAmount));
+        plusButton.addActionListener(e -> adjustSlider(slider, plusAmount));
+
+        control.add(minusButton);
+        control.add(slider);
+        control.add(plusButton);
+        return control;
+    }
+
+    static void adjustSlider(JSlider slider, int amount) {
+        slider.setValue(Math.max(slider.getMinimum(), Math.min(slider.getMaximum(), slider.getValue() + amount)));
+    }
+
+    static JButton createAdjustmentButton(String text) {
+        JButton button = createMenuButton(text, false);
+        button.setFont(new Font("SansSerif", Font.BOLD, 21));
+        Dimension size = new Dimension(44, 44);
+        button.setMinimumSize(size);
+        button.setPreferredSize(size);
+        button.setMaximumSize(size);
+        button.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+        button.setToolTipText(text.equals("−") ? "小さくする / 遅くする" : "大きくする / 速くする");
+        return button;
+    }
+
+    static class SettingsSliderUI extends BasicSliderUI {
+        SettingsSliderUI(JSlider slider) { super(slider); }
+
+        @Override protected Dimension getThumbSize() { return new Dimension(18, 18); }
+
+        @Override public void paintTrack(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            int y = trackRect.y + (trackRect.height - 6) / 2;
+            g2.setColor(new Color(255, 255, 255, 38));
+            g2.fillRoundRect(trackRect.x, y, trackRect.width, 6, 6, 6);
+            int thumbCenter = thumbRect.x + thumbRect.width / 2;
+            g2.setColor(ACCENT);
+            g2.fillRoundRect(trackRect.x, y, Math.max(0, thumbCenter - trackRect.x), 6, 6, 6);
+            g2.dispose();
+        }
+
+        @Override public void paintThumb(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setColor(new Color(255, 245, 228));
+            g2.fillOval(thumbRect.x, thumbRect.y, thumbRect.width, thumbRect.height);
+            g2.setColor(ACCENT);
+            g2.drawOval(thumbRect.x, thumbRect.y, thumbRect.width - 1, thumbRect.height - 1);
+            g2.dispose();
+        }
     }
 
     static class AtmospherePanel extends JPanel {
