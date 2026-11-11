@@ -73,7 +73,7 @@ public class Main {
         JButton loadButton = createMenuButton("ロード", false);
         JButton settingsButton = createMenuButton("設定", false);
         JButton exitButton = createMenuButton("終了", false);
-        for (JButton button : new JButton[] {startButton, loadButton, settingsButton, exitButton}) {
+        for (JButton button : new JButton[] { startButton, loadButton, settingsButton, exitButton }) {
             button.setAlignmentX(Component.CENTER_ALIGNMENT);
             Dimension buttonSize = new Dimension(300, 54);
             button.setMinimumSize(buttonSize);
@@ -94,7 +94,10 @@ public class Main {
         menu.add(exitButton);
         panel.add(menu);
         startButton.addActionListener(e -> showGame());
-        loadButton.addActionListener(e -> { if (loadGame()) showGame(); });
+        loadButton.addActionListener(e -> {
+            if (loadGame())
+                showGame();
+        });
         settingsButton.addActionListener(e -> showSettings());
         exitButton.addActionListener(e -> frame.dispose());
         return panel;
@@ -117,7 +120,8 @@ public class Main {
         fontSizeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         JSlider fontSizeSlider = createSettingsSlider(18, 32, dialogueFontSize, false);
 
-        JLabel textSpeedLabel = new JLabel("\u6587\u5b57\u9001\u308a\u306e\u901f\u5ea6\uff08\u9045\u3044 \u2190 \u2192 \u901f\u3044\uff09");
+        JLabel textSpeedLabel = new JLabel(
+                "\u6587\u5b57\u9001\u308a\u306e\u901f\u5ea6\uff08\u9045\u3044 \u2190 \u2192 \u901f\u3044\uff09");
         textSpeedLabel.setForeground(MUTED);
         textSpeedLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         JSlider textSpeedSlider = createSettingsSlider(INSTANT_TEXT_DELAY, 150, textDelayMs, true);
@@ -126,7 +130,7 @@ public class Main {
         speedPreview.setForeground(new Color(255, 220, 150));
         speedPreview.setFont(new Font("SansSerif", Font.PLAIN, dialogueFontSize));
         speedPreview.setAlignmentX(Component.CENTER_ALIGNMENT);
-        int[] previewCharacters = {0};
+        int[] previewCharacters = { 0 };
         Timer speedPreviewTimer = new Timer(textDelayMs, e -> {
             if (previewCharacters[0] < speedPreviewText.length()) {
                 previewCharacters[0]++;
@@ -172,7 +176,8 @@ public class Main {
         });
 
         JPanel previewBox = new JPanel() {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 super.paintComponent(g);
                 g2.setColor(SURFACE);
@@ -217,9 +222,13 @@ public class Main {
         return panel;
     }
 
-    static void showTitle() { cardLayout.show(mainPanel, "TITLE"); }
+    static void showTitle() {
+        cardLayout.show(mainPanel, "TITLE");
+    }
 
-    static void showSettings() { cardLayout.show(mainPanel, "SETTINGS"); }
+    static void showSettings() {
+        cardLayout.show(mainPanel, "SETTINGS");
+    }
 
     static void showGame() {
         cardLayout.show(mainPanel, "GAME");
@@ -235,23 +244,31 @@ public class Main {
         input.put(KeyStroke.getKeyStroke("F5"), "saveGame");
         input.put(KeyStroke.getKeyStroke("F9"), "loadGame");
         actions.put("toggleDialogue", new AbstractAction() {
-            @Override public void actionPerformed(ActionEvent e) {
-                if (gamePanel.isShowing()) gamePanel.toggleDialogue();
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (gamePanel.isShowing())
+                    gamePanel.toggleDialogue();
             }
         });
         actions.put("toggleInventory", new AbstractAction() {
-            @Override public void actionPerformed(ActionEvent e) {
-                if (gamePanel.isShowing()) gamePanel.toggleInventory();
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (gamePanel.isShowing())
+                    gamePanel.toggleInventory();
             }
         });
         actions.put("saveGame", new AbstractAction() {
-            @Override public void actionPerformed(ActionEvent e) {
-                if (gamePanel.isShowing()) saveGame();
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (gamePanel.isShowing())
+                    saveGame();
             }
         });
         actions.put("loadGame", new AbstractAction() {
-            @Override public void actionPerformed(ActionEvent e) {
-                if (gamePanel.isShowing()) loadGame();
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (gamePanel.isShowing())
+                    loadGame();
             }
         });
     }
@@ -282,9 +299,8 @@ public class Main {
             gamePanel.characterName = data.getProperty("characterName", gamePanel.characterName);
             gamePanel.message = data.getProperty("message", gamePanel.message);
             gamePanel.visibleCharacters = Math.max(0, Math.min(
-                Integer.parseInt(data.getProperty("visibleCharacters", "0")),
-                gamePanel.message.length()
-            ));
+                    Integer.parseInt(data.getProperty("visibleCharacters", "0")),
+                    gamePanel.message.length()));
             if (gamePanel.visibleCharacters < gamePanel.message.length()) {
                 gamePanel.textTimer.start();
             }
@@ -306,17 +322,17 @@ public class Main {
         for (String line : gamePanel.backlog) {
             text.append(line).append(System.lineSeparator());
         }
-        JOptionPane.showMessageDialog(frame, text.toString(), "\u30d0\u30c3\u30af\u30ed\u30b0", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(frame, text.toString(), "\u30d0\u30c3\u30af\u30ed\u30b0",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     static void confirmReturnToTitle() {
         int choice = JOptionPane.showConfirmDialog(
-            frame,
-            "\u30bf\u30a4\u30c8\u30eb\u306b\u623b\u308a\u307e\u3059\u304b\uff1f",
-            "\u30bf\u30a4\u30c8\u30eb\u3078\u623b\u308b",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE
-        );
+                frame,
+                "\u30bf\u30a4\u30c8\u30eb\u306b\u623b\u308a\u307e\u3059\u304b\uff1f",
+                "\u30bf\u30a4\u30c8\u30eb\u3078\u623b\u308b",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
         if (choice == JOptionPane.YES_OPTION) {
             showTitle();
         }
@@ -333,12 +349,13 @@ public class Main {
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         button.setBorder(BorderFactory.createEmptyBorder(0, 24, 0, 24));
         button.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
-            @Override public void paint(Graphics g, JComponent c) {
+            @Override
+            public void paint(Graphics g, JComponent c) {
                 AbstractButton b = (AbstractButton) c;
                 Graphics2D g2 = (Graphics2D) g.create();
                 boolean hover = b.getModel().isRollover();
                 g2.setColor(primary ? (hover ? new Color(255, 199, 132) : ACCENT)
-                    : (hover ? new Color(255, 255, 255, 45) : new Color(255, 255, 255, 20)));
+                        : (hover ? new Color(255, 255, 255, 45) : new Color(255, 255, 255, 20)));
                 g2.fillRoundRect(0, 0, c.getWidth(), c.getHeight(), 14, 14);
                 if (!primary) {
                     g2.setColor(new Color(255, 255, 255, hover ? 100 : 55));
@@ -394,11 +411,17 @@ public class Main {
     }
 
     static class SettingsSliderUI extends BasicSliderUI {
-        SettingsSliderUI(JSlider slider) { super(slider); }
+        SettingsSliderUI(JSlider slider) {
+            super(slider);
+        }
 
-        @Override protected Dimension getThumbSize() { return new Dimension(18, 18); }
+        @Override
+        protected Dimension getThumbSize() {
+            return new Dimension(18, 18);
+        }
 
-        @Override public void paintTrack(Graphics g) {
+        @Override
+        public void paintTrack(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             int y = trackRect.y + (trackRect.height - 6) / 2;
             g2.setColor(new Color(255, 255, 255, 38));
@@ -409,7 +432,8 @@ public class Main {
             g2.dispose();
         }
 
-        @Override public void paintThumb(Graphics g) {
+        @Override
+        public void paintThumb(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setColor(new Color(255, 245, 228));
             g2.fillOval(thumbRect.x, thumbRect.y, thumbRect.width, thumbRect.height);
@@ -424,7 +448,9 @@ public class Main {
             super(new GridBagLayout());
             setOpaque(false);
         }
-        @Override protected void paintComponent(Graphics g) {
+
+        @Override
+        protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setPaint(new GradientPaint(0, 0, new Color(17, 22, 49), getWidth(), getHeight(), new Color(54, 28, 72)));
@@ -458,7 +484,8 @@ public class Main {
             items.add("\u53e4\u3044\u9375");
             items.add("\u6708\u306e\u6b20\u7247");
             addMouseListener(new MouseAdapter() {
-                @Override public void mouseClicked(MouseEvent e) {
+                @Override
+                public void mouseClicked(MouseEvent e) {
                     if (!handleDialogueMenuClick(e.getX(), e.getY())) {
                         finishTextAnimation();
                     }
@@ -480,7 +507,7 @@ public class Main {
 
         boolean handleDialogueMenuClick(int mouseX, int mouseY) {
             double scale = Math.min(getWidth() / (double) GAME_WIDTH,
-                getHeight() / (double) GAME_HEIGHT);
+                    getHeight() / (double) GAME_HEIGHT);
             int x = (int) ((mouseX - (getWidth() - GAME_WIDTH * scale) / 2) / scale);
             int y = (int) ((mouseY - (getHeight() - GAME_HEIGHT * scale) / 2) / scale);
             if (inventoryVisible) {
@@ -493,23 +520,25 @@ public class Main {
                 }
                 return true;
             }
-            if (!dialogueVisible) return false;
-            if (y < 640 || y > 680) return false;
+            if (!dialogueVisible)
+                return false;
+            if (y < 640 || y > 680)
+                return false;
 
-            if (x >= 850 && x < 905) {
+            if (x >= 850 && x < 915) {
+                toggleInventory();
+                return true;
+            } else if (x >= 920 && x < 975) {
                 saveGame();
                 return true;
-            } else if (x >= 910 && x < 965) {
+            } else if (x >= 980 && x < 1035) {
                 loadGame();
                 return true;
-            } else if (x >= 970 && x < 1045) {
+            } else if (x >= 1040 && x < 1115) {
                 showBacklog();
                 return true;
-            } else if (x >= 1050 && x < 1110) {
-                confirmReturnToTitle();
-                return true;
             } else if (x >= 1120 && x < 1185) {
-                toggleInventory();
+                confirmReturnToTitle();
                 return true;
             }
             return false;
@@ -546,7 +575,8 @@ public class Main {
             }
         }
 
-        @Override protected void paintComponent(Graphics g) {
+        @Override
+        protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
             double scale = Math.min(getWidth() / (double) GAME_WIDTH, getHeight() / (double) GAME_HEIGHT);
@@ -557,8 +587,10 @@ public class Main {
             drawBackground(g2);
             drawCharacter(g2);
             drawEventImage(g2);
-            if (dialogueVisible) drawDialogue(g2);
-            if (inventoryVisible) drawInventory(g2);
+            if (dialogueVisible)
+                drawDialogue(g2);
+            if (inventoryVisible)
+                drawInventory(g2);
             g2.dispose();
         }
 
@@ -571,8 +603,8 @@ public class Main {
                 g2.setColor(new Color(255, 208, 142, 40));
                 g2.fillOval(875, 62, 220, 220);
                 g2.setColor(new Color(10, 13, 29, 90));
-                int[] x = {0, 0, 260, 425, 600, 790, 980, 1280, 1280};
-                int[] y = {500, 720, 720, 540, 720, 490, 720, 540, 720};
+                int[] x = { 0, 0, 260, 425, 600, 790, 980, 1280, 1280 };
+                int[] y = { 500, 720, 720, 540, 720, 490, 720, 540, 720 };
                 g2.fillPolygon(x, y, x.length);
                 g2.setColor(new Color(255, 255, 255, 28));
                 for (int i = 0; i < 42; i++) {
@@ -594,7 +626,8 @@ public class Main {
         }
 
         void drawEventImage(Graphics2D g2) {
-            if (eventImage != null) g2.drawImage(eventImage, 0, 0, GAME_WIDTH, GAME_HEIGHT, null);
+            if (eventImage != null)
+                g2.drawImage(eventImage, 0, 0, GAME_WIDTH, GAME_HEIGHT, null);
         }
 
         void drawDialogue(Graphics2D g2) {
@@ -613,11 +646,11 @@ public class Main {
 
             g2.setFont(new Font("SansSerif", Font.BOLD, 13));
             g2.setColor(MUTED);
-            g2.drawString("\u30bb\u30fc\u30d6", 850, 665);
-            g2.drawString("\u30ed\u30fc\u30c9", 910, 665);
-            g2.drawString("\u30d0\u30c3\u30af\u30ed\u30b0", 970, 665);
-            g2.drawString("\u30bf\u30a4\u30c8\u30eb", 1050, 665);
-            g2.drawString("\u30a2\u30a4\u30c6\u30e0", 1120, 665);
+            g2.drawString("\u30a2\u30a4\u30c6\u30e0", 850, 665);
+            g2.drawString("\u30bb\u30fc\u30d6", 920, 665);
+            g2.drawString("\u30ed\u30fc\u30c9", 980, 665);
+            g2.drawString("\u30d0\u30c3\u30af\u30ed\u30b0", 1040, 665);
+            g2.drawString("\u30bf\u30a4\u30c8\u30eb", 1120, 665);
             g2.setColor(ACCENT);
             g2.drawString("\u25bc", 1190, 630);
         }
@@ -652,10 +685,13 @@ public class Main {
             g2.drawString("\u8a73\u7d30", 305, 365);
             g2.setColor(Color.WHITE);
             g2.setFont(new Font("SansSerif", Font.PLAIN, 17));
-            g2.drawString(selectedItem == null ? "\u30a2\u30a4\u30c6\u30e0\u3092\u30af\u30ea\u30c3\u30af\u3057\u3066\u8a73\u7d30\u3092\u8868\u793a\u3057\u307e\u3059\u3002" : itemDescription(selectedItem), 305, 400);
+            g2.drawString(selectedItem == null
+                    ? "\u30a2\u30a4\u30c6\u30e0\u3092\u30af\u30ea\u30c3\u30af\u3057\u3066\u8a73\u7d30\u3092\u8868\u793a\u3057\u307e\u3059\u3002"
+                    : itemDescription(selectedItem), 305, 400);
             g2.setColor(MUTED);
             g2.setFont(new Font("SansSerif", Font.PLAIN, 14));
-            g2.drawString("\u30af\u30ea\u30c3\u30af\u307e\u305f\u306f I \u30ad\u30fc\u3067\u9589\u3058\u308b", 305, 470);
+            g2.drawString("\u30af\u30ea\u30c3\u30af\u307e\u305f\u306f I \u30ad\u30fc\u3067\u9589\u3058\u308b", 305,
+                    470);
         }
 
         String itemDescription(String item) {
