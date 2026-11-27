@@ -511,8 +511,8 @@ public class Main {
             int x = (int) ((mouseX - (getWidth() - GAME_WIDTH * scale) / 2) / scale);
             int y = (int) ((mouseY - (getHeight() - GAME_HEIGHT * scale) / 2) / scale);
             if (inventoryVisible) {
-                int itemIndex = (y - 230) / 42;
-                if (x >= 300 && x <= 700 && y >= 230 && itemIndex >= 0 && itemIndex < items.size()) {
+                int itemIndex = (y - 225) / 48;
+                if (x >= 300 && x <= 575 && y >= 225 && itemIndex >= 0 && itemIndex < items.size()) {
                     selectedItem = items.get(itemIndex);
                     repaint();
                 } else {
@@ -672,26 +672,95 @@ public class Main {
             } else {
                 for (int i = 0; i < items.size(); i++) {
                     boolean selected = items.get(i).equals(selectedItem);
+                    int rowY = 225 + i * 48;
+                    if (selected) {
+                        g2.setColor(new Color(255, 179, 104, 32));
+                        g2.fillRoundRect(295, rowY, 270, 39, 10, 10);
+                    }
                     g2.setColor(selected ? ACCENT : MUTED);
-                    g2.fillOval(310, 244 + i * 42, 9, 9);
+                    g2.fillOval(310, rowY + 14, 9, 9);
                     g2.setColor(selected ? ACCENT : Color.WHITE);
-                    g2.drawString(items.get(i), 334, 255 + i * 42);
+                    g2.drawString(items.get(i), 334, rowY + 26);
                 }
             }
             g2.setColor(new Color(255, 255, 255, 45));
-            g2.drawLine(305, 330, 975, 330);
-            g2.setColor(ACCENT);
-            g2.setFont(new Font("SansSerif", Font.BOLD, 16));
-            g2.drawString("\u8a73\u7d30", 305, 365);
-            g2.setColor(Color.WHITE);
-            g2.setFont(new Font("SansSerif", Font.PLAIN, 17));
-            g2.drawString(selectedItem == null
-                    ? "\u30a2\u30a4\u30c6\u30e0\u3092\u30af\u30ea\u30c3\u30af\u3057\u3066\u8a73\u7d30\u3092\u8868\u793a\u3057\u307e\u3059\u3002"
-                    : itemDescription(selectedItem), 305, 400);
+            g2.drawLine(590, 220, 590, 455);
+            drawItemDetail(g2);
             g2.setColor(MUTED);
             g2.setFont(new Font("SansSerif", Font.PLAIN, 14));
             g2.drawString("\u30af\u30ea\u30c3\u30af\u307e\u305f\u306f I \u30ad\u30fc\u3067\u9589\u3058\u308b", 305,
                     470);
+        }
+
+        void drawItemDetail(Graphics2D g2) {
+            int imageX = 630;
+            int imageY = 230;
+            g2.setColor(new Color(255, 255, 255, 16));
+            g2.fillRoundRect(imageX, imageY, 145, 145, 16, 16);
+            g2.setColor(new Color(255, 255, 255, 45));
+            g2.drawRoundRect(imageX, imageY, 145, 145, 16, 16);
+
+            if (selectedItem == null) {
+                g2.setColor(MUTED);
+                g2.setFont(new Font("SansSerif", Font.PLAIN, 17));
+                g2.drawString("\u30a2\u30a4\u30c6\u30e0\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002", 805, 285);
+                g2.setFont(new Font("SansSerif", Font.PLAIN, 14));
+                g2.drawString("\u30a4\u30e9\u30b9\u30c8\u3068\u8aac\u660e\u304c\u3053\u3053\u306b\u8868\u793a\u3055\u308c\u307e\u3059\u3002", 805, 314);
+                return;
+            }
+
+            drawItemIllustration(g2, selectedItem, imageX, imageY);
+            g2.setColor(ACCENT);
+            g2.setFont(new Font("Serif", Font.BOLD, 23));
+            g2.drawString(selectedItem, 805, 270);
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("SansSerif", Font.PLAIN, 16));
+            drawWrappedText(g2, itemDescription(selectedItem), 805, 305, 180, 24);
+        }
+
+        void drawItemIllustration(Graphics2D g2, String item, int x, int y) {
+            Graphics2D art = (Graphics2D) g2.create();
+            art.translate(x, y);
+            art.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if ("\u53e4\u3044\u9375".equals(item)) {
+                art.setColor(new Color(112, 77, 52));
+                art.fillRoundRect(37, 67, 69, 20, 10, 10);
+                art.setColor(new Color(190, 135, 82));
+                art.fillOval(21, 50, 46, 46);
+                art.setColor(new Color(12, 18, 40));
+                art.fillOval(32, 61, 24, 24);
+                art.setColor(new Color(190, 135, 82));
+                art.fillRect(93, 78, 13, 25);
+                art.fillRect(74, 78, 10, 16);
+            } else {
+                art.setColor(new Color(151, 204, 255, 42));
+                art.fillOval(25, 23, 95, 95);
+                art.setColor(new Color(191, 222, 255));
+                int[] xs = { 76, 104, 91, 112, 78, 55, 42, 64, 51 };
+                int[] ys = { 24, 61, 69, 104, 119, 96, 62, 67, 42 };
+                art.fillPolygon(xs, ys, xs.length);
+                art.setColor(new Color(255, 255, 255, 130));
+                art.drawPolygon(xs, ys, xs.length);
+            }
+            art.dispose();
+        }
+
+        void drawWrappedText(Graphics2D g2, String text, int x, int y, int maxWidth, int lineHeight) {
+            FontMetrics metrics = g2.getFontMetrics();
+            StringBuilder line = new StringBuilder();
+            int lineY = y;
+            for (int i = 0; i < text.length(); i++) {
+                line.append(text.charAt(i));
+                if (metrics.stringWidth(line.toString()) > maxWidth) {
+                    line.deleteCharAt(line.length() - 1);
+                    g2.drawString(line.toString(), x, lineY);
+                    line.setLength(0);
+                    line.append(text.charAt(i));
+                    lineY += lineHeight;
+                }
+            }
+            if (line.length() > 0)
+                g2.drawString(line.toString(), x, lineY);
         }
 
         String itemDescription(String item) {
